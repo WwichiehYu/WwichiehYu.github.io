@@ -55,6 +55,12 @@ button {
     margin-top: 10px;
 }
 
+.note {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
 /* ❤️ 愛心 */
 .heart {
     font-size: 70px;
@@ -93,16 +99,21 @@ td, th {
 
 <h1>💖 我專屬的寶寶任務 💖</h1>
 
-<!-- 任務 -->
 <div id="tasks"></div>
 
 <div class="total">總分：<span id="total">0</span></div>
 <div class="reward">🎁 可換麥當勞：<span id="reward">0</span></div>
+
 <div class="note">
 在原本帳號附上照片才算分喔 📸
 </div>
 
-<!-- ❤️ 愛心（已移到下面） -->
+<!-- 🔥 歸零按鈕 -->
+<button onclick="resetTotal()" style="margin-top:10px; background:#ff4d6d; color:white; padding:8px 12px; border-radius:8px;">
+    🔄 總分歸零
+</button>
+
+<!-- ❤️ 愛心 -->
 <div class="heart" id="heart">❤️</div>
 <div class="message" id="msg">今天也要想我一下喔 ❤️</div>
 
@@ -171,6 +182,15 @@ function minus(i){
     renderTasks();
 }
 
+// 🔄 總分歸零
+function resetTotal(){
+    if(confirm("確定要把總分歸零嗎？")){
+        tasks.forEach(t => t.score = 0);
+        save();
+        renderTasks();
+    }
+}
+
 // 渲染任務
 function renderTasks(){
     let html = "";
@@ -212,6 +232,11 @@ function renderHistory(){
 // 初始化
 renderTasks();
 renderHistory();
+
+</script>
+
+</body>
+</html>
 
 </script>
 
