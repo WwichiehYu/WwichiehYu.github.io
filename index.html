@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>專屬任務小遊戲 ❤️</title>
+
+<style>
+body {
+    font-family: "Microsoft JhengHei", sans-serif;
+    background: linear-gradient(135deg, #ffd1dc, #ffe4e1);
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    color: #ff4d6d;
+}
+
+.container {
+    max-width: 500px;
+    margin: auto;
+}
+
+.task {
+    background: white;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.btn-group button {
+    margin-left: 5px;
+}
+
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.add-btn {
+    background: #ff85a2;
+    color: white;
+}
+
+.minus-btn {
+    background: #999;
+    color: white;
+}
+
+.reset-btn {
+    margin-top: 20px;
+    background: #444;
+    color: white;
+}
+
+.total {
+    font-size: 20px;
+    margin-top: 15px;
+    color: #333;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>💖 寶寶任務挑戰 💖</h1>
+<p>每天都要乖乖完成任務喔 ❤️ 我很快就回來了</p>
+<p>完成任務才有獎勵 100點換1份麥當勞小點心或是飲料</p>
+<div class="container" id="taskList"></div>
+
+<div class="total">總分：<span id="totalScore">0</span></div>
+
+<button class="reset-btn" onclick="resetAll()">全部歸零</button>
+
+<script>
+
+const defaultTasks = [
+    "倒垃圾",
+    "掃地",
+    "拖地",
+    "整理書桌",
+    "摺衣服",
+    "早睡"
+];
+
+let tasks = JSON.parse(localStorage.getItem("tasks_v2"));
+
+if (!tasks) {
+    tasks = defaultTasks.map(name => ({ name, score: 0 }));
+}
+
+function saveData() {
+    localStorage.setItem("tasks_v2", JSON.stringify(tasks));
+}
+
+function render() {
+    const list = document.getElementById("taskList");
+    list.innerHTML = "";
+
+    let total = 0;
+
+    tasks.forEach((task, index) => {
+        total += task.score;
+
+        const div = document.createElement("div");
+        div.className = "task";
+
+        div.innerHTML = `
+            <span>${task.name}：${task.score} 分</span>
+            <div class="btn-group">
+                <button class="add-btn" onclick="addScore(${index})">+10</button>
+                <button class="minus-btn" onclick="minusScore(${index})">-10</button>
+            </div>
+        `;
+
+        list.appendChild(div);
+    });
+
+    document.getElementById("totalScore").innerText = total;
+}
+
+function addScore(index) {
+    tasks[index].score += 10;
+    saveData();
+    render();
+}
+
+function minusScore(index) {
+    tasks[index].score = Math.max(0, tasks[index].score - 10);
+    saveData();
+    render();
+}
+
+function resetAll() {
+    tasks = tasks.map(task => ({
+        ...task,
+        score: 0
+    }));
+    saveData();
+    render();
+}
+
+render();
+
+</script>
+
+</body>
+</html>
