@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>專屬任務小遊戲 ❤️</title>
+<title>專屬任務獎勵系統 ❤️</title>
 
 <style>
 body {
@@ -65,6 +65,12 @@ button {
     margin-top: 15px;
     color: #333;
 }
+
+.reward {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #ff4d6d;
+}
 </style>
 
 </head>
@@ -72,11 +78,12 @@ button {
 <body>
 
 <h1>💖 寶寶任務挑戰 💖</h1>
-<p>每天都要乖乖完成任務喔 ❤️ 我很快就回來了</p>
-<p>完成任務才有獎勵 100點換1份麥當勞小點心或是飲料</p>
+<p>完成任務累積 100 分 → 可以換一份麥當勞 🍟🥤</p>
+
 <div class="container" id="taskList"></div>
 
 <div class="total">總分：<span id="totalScore">0</span></div>
+<div class="reward">🎁 可兌換獎勵：<span id="rewardCount">0</span> 份</div>
 
 <button class="reset-btn" onclick="resetAll()">全部歸零</button>
 
@@ -91,14 +98,14 @@ const defaultTasks = [
     "早睡"
 ];
 
-let tasks = JSON.parse(localStorage.getItem("tasks_v2"));
+let tasks = JSON.parse(localStorage.getItem("tasks_reward"));
 
 if (!tasks) {
     tasks = defaultTasks.map(name => ({ name, score: 0 }));
 }
 
 function saveData() {
-    localStorage.setItem("tasks_v2", JSON.stringify(tasks));
+    localStorage.setItem("tasks_reward", JSON.stringify(tasks));
 }
 
 function render() {
@@ -125,6 +132,10 @@ function render() {
     });
 
     document.getElementById("totalScore").innerText = total;
+
+    // 🎁 計算獎勵（每100分1份）
+    const rewards = Math.floor(total / 100);
+    document.getElementById("rewardCount").innerText = rewards;
 }
 
 function addScore(index) {
@@ -140,12 +151,14 @@ function minusScore(index) {
 }
 
 function resetAll() {
-    tasks = tasks.map(task => ({
-        ...task,
-        score: 0
-    }));
-    saveData();
-    render();
+    if (confirm("確定要全部歸零嗎？🥺")) {
+        tasks = tasks.map(task => ({
+            ...task,
+            score: 0
+        }));
+        saveData();
+        render();
+    }
 }
 
 render();
