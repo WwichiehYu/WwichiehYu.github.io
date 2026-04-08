@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>專屬任務獎勵系統 ❤️</title>
+<title>💖 專屬戀愛任務系統</title>
 
 <style>
 body {
-    font-family: "Microsoft JhengHei", sans-serif;
-    background: linear-gradient(135deg, #ffd1dc, #ffe4e1);
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #ffe6f0, #fff0f5);
     text-align: center;
     padding: 20px;
 }
@@ -22,54 +22,68 @@ h1 {
     margin: auto;
 }
 
+/* 任務 */
 .task {
     background: white;
-    margin: 10px 0;
-    padding: 15px;
-    border-radius: 15px;
+    margin: 10px auto;
+    padding: 12px;
+    border-radius: 12px;
+    max-width: 400px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-.btn-group button {
-    margin-left: 5px;
 }
 
 button {
     border: none;
-    border-radius: 10px;
-    padding: 8px 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
     cursor: pointer;
 }
 
-.add-btn {
-    background: #ff85a2;
-    color: white;
-}
+.add { background: #ff85a2; color: white; }
+.minus { background: #999; color: white; }
 
-.minus-btn {
-    background: #999;
-    color: white;
-}
-
-.reset-btn {
-    margin-top: 20px;
-    background: #444;
-    color: white;
-}
-
+/* 分數 */
 .total {
-    font-size: 20px;
     margin-top: 15px;
-    color: #333;
+    font-size: 20px;
 }
 
 .reward {
-    margin-top: 20px;
-    font-size: 18px;
     color: #ff4d6d;
+    margin-top: 10px;
+}
+
+/* ❤️ 愛心 */
+.heart {
+    font-size: 70px;
+    cursor: pointer;
+    margin-top: 25px;
+    transition: transform 0.2s;
+}
+
+.heart.pop {
+    transform: scale(1.5);
+}
+
+/* 情話 */
+.message {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #d6336c;
+    min-height: 30px;
+}
+
+/* 表格 */
+table {
+    margin: 20px auto;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #ff4d6d;
+    padding: 5px 10px;
 }
 </style>
 
@@ -77,91 +91,124 @@ button {
 
 <body>
 
-<h1>💖 寶寶任務挑戰 💖</h1>
-<p>完成任務累積 100 分 → 可以換一份麥當勞 🍟🥤</p>
+<h1>💖 我專屬的寶寶任務 💖</h1>
 
-<div class="container" id="taskList"></div>
+<!-- 任務 -->
+<div id="tasks"></div>
 
-<div class="total">總分：<span id="totalScore">0</span></div>
-<div class="reward">🎁 可兌換獎勵：<span id="rewardCount">0</span> 份</div>
+<div class="total">總分：<span id="total">0</span></div>
+<div class="reward">🎁 可換麥當勞：<span id="reward">0</span></div>
 
-<button class="reset-btn" onclick="resetAll()">全部歸零</button>
+<!-- ❤️ 愛心（已移到下面） -->
+<div class="heart" id="heart">❤️</div>
+<div class="message" id="msg">今天也要想我一下喔 ❤️</div>
+
+<h3>📅 愛心紀錄</h3>
+<table>
+<tr><th>日期</th><th>次數</th></tr>
+<tbody id="history"></tbody>
+</table>
 
 <script>
 
-const defaultTasks = [
-    "倒垃圾",
-    "掃地",
-    "拖地",
-    "整理書桌",
-    "摺衣服",
-    "早睡"
+// 任務
+const list = ["倒垃圾","掃地","拖地","整理書桌","摺衣服","早睡"];
+
+let tasks = JSON.parse(localStorage.getItem("tasks_final"));
+if (!tasks) {
+    tasks = list.map(t => ({name:t, score:0}));
+}
+
+// 愛心資料
+let data = JSON.parse(localStorage.getItem("love_final")) || {};
+let today = new Date().toISOString().split('T')[0];
+let love = data[today] || 0;
+
+// 情話
+const msgs = [
+    "想你 ❤️",
+    "今天有乖喔 💕",
+    "我在偷偷想你 😳",
+    "好棒，給你抱抱 🤗",
+    "寶寶最棒了 💖",
+    "我愛你 ❤️"
 ];
 
-let tasks = JSON.parse(localStorage.getItem("tasks_reward"));
+// ❤️ 愛心
+const heart = document.getElementById("heart");
+const msg = document.getElementById("msg");
 
-if (!tasks) {
-    tasks = defaultTasks.map(name => ({ name, score: 0 }));
+heart.onclick = () => {
+    love++;
+    data[today] = love;
+    localStorage.setItem("love_final", JSON.stringify(data));
+
+    heart.classList.add("pop");
+    setTimeout(()=>heart.classList.remove("pop"),200);
+
+    msg.innerText = msgs[Math.floor(Math.random()*msgs.length)];
+
+    renderHistory();
+};
+
+// 任務操作
+function save(){
+    localStorage.setItem("tasks_final", JSON.stringify(tasks));
 }
 
-function saveData() {
-    localStorage.setItem("tasks_reward", JSON.stringify(tasks));
+function add(i){
+    tasks[i].score += 10;
+    save();
+    renderTasks();
 }
 
-function render() {
-    const list = document.getElementById("taskList");
-    list.innerHTML = "";
+function minus(i){
+    tasks[i].score = Math.max(0, tasks[i].score - 10);
+    save();
+    renderTasks();
+}
 
+// 渲染任務
+function renderTasks(){
+    let html = "";
     let total = 0;
 
-    tasks.forEach((task, index) => {
-        total += task.score;
+    tasks.forEach((t,i)=>{
+        total += t.score;
 
-        const div = document.createElement("div");
-        div.className = "task";
-
-        div.innerHTML = `
-            <span>${task.name}：${task.score} 分</span>
-            <div class="btn-group">
-                <button class="add-btn" onclick="addScore(${index})">+10</button>
-                <button class="minus-btn" onclick="minusScore(${index})">-10</button>
+        html += `
+        <div class="task">
+            <span>${t.name}：${t.score}</span>
+            <div>
+                <button class="add" onclick="add(${i})">+10</button>
+                <button class="minus" onclick="minus(${i})">-10</button>
             </div>
-        `;
-
-        list.appendChild(div);
+        </div>`;
     });
 
-    document.getElementById("totalScore").innerText = total;
-
-    // 🎁 計算獎勵（每100分1份）
-    const rewards = Math.floor(total / 100);
-    document.getElementById("rewardCount").innerText = rewards;
+    document.getElementById("tasks").innerHTML = html;
+    document.getElementById("total").innerText = total;
+    document.getElementById("reward").innerText = Math.floor(total/100);
 }
 
-function addScore(index) {
-    tasks[index].score += 10;
-    saveData();
-    render();
-}
+// 愛心紀錄
+function renderHistory(){
+    let tbody = document.getElementById("history");
+    tbody.innerHTML = "";
 
-function minusScore(index) {
-    tasks[index].score = Math.max(0, tasks[index].score - 10);
-    saveData();
-    render();
-}
+    for(let i=6;i>=0;i--){
+        let d = new Date();
+        d.setDate(d.getDate()-i);
+        let date = d.toISOString().split('T')[0];
+        let count = data[date] || 0;
 
-function resetAll() {
-    if (confirm("確定要全部歸零嗎？🥺")) {
-        tasks = tasks.map(task => ({
-            ...task,
-            score: 0
-        }));
-        saveData();
-        render();
+        tbody.innerHTML += `<tr><td>${date}</td><td>${count}</td></tr>`;
     }
 }
 
-render();
+// 初始化
+renderTasks();
+renderHistory();
 
 </script>
 
